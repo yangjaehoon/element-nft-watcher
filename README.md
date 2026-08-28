@@ -73,8 +73,9 @@ TG_CHAT_ID=chat_id
 ## 실행
 
 ```bash
-npm run poll      # 폴링
-npm run stream    # 스트림 (DEBUG=1 npm run stream 으로 첫 이벤트 구조 확인)
+npm run test:notify   # 알림 채널 설정 확인 (먼저 한 번 실행 권장)
+npm run poll          # 폴링
+npm run stream        # 스트림 (DEBUG=1 npm run stream 으로 첫 이벤트 구조 확인)
 ```
 
 상시 실행은 pm2 권장.
