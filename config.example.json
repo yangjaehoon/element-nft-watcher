@@ -1,0 +1,25 @@
+{
+  "intervalMs": 20000,
+  "maxPagesPerContract": 3,
+  "watchlist": [
+    {
+      "name": "Collection A",
+      "contract": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "slug": "collection-a-slug",
+      "tokens": {
+        "12": 250,
+        "87": 300,
+        "150": 500
+      }
+    },
+    {
+      "name": "Collection B",
+      "contract": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "slug": "collection-b-slug",
+      "tokens": {
+        "4": 1000,
+        "9": 1200
+      }
+    }
+  ]
+}
