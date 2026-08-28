@@ -74,7 +74,9 @@ function connect() {
 
     const tokenId = String(p.tokenId ?? p.token_id ?? "");
     const priceUsd = Number(p.priceUSD ?? p.price_usd ?? NaN);
-    const maxUsd = w.tokens?.[tokenId];
+
+    // tokens 지정 시 해당 token_id 목표가, 아니면 컬렉션 maxPriceUsd
+    const maxUsd = w.tokens ? w.tokens[tokenId] : w.maxPriceUsd;
 
     if (maxUsd == null || !(priceUsd <= maxUsd)) return;
 

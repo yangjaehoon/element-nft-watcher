@@ -6,14 +6,10 @@
       "name": "Collection A",
       "contract": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       "slug": "collection-a-slug",
-      "tokens": {
-        "12": 250,
-        "87": 300,
-        "150": 500
-      }
+      "maxPriceUsd": 300
     },
     {
-      "name": "Collection B",
+      "name": "Collection B (특정 번호만 감시하고 싶을 때)",
       "contract": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
       "slug": "collection-b-slug",
       "tokens": {

@@ -58,8 +58,13 @@ TG_CHAT_ID=chat_id
       "name": "표시용 이름",
       "contract": "0x... NFT 컨트랙트 주소",
       "slug": "element 컬렉션 슬러그(스트림 방식에서만 사용)",
-      "tokens": {
-        "12": 250,              // tokenId : 목표가(USD). 이 값 이하이면 알림
+      "maxPriceUsd": 300          // 컬렉션 최저가 감시: 이 값 이하 매물이 뜨면 알림
+    },
+    {
+      "name": "특정 번호만 감시",
+      "contract": "0x...",
+      "tokens": {                 // tokens 를 넣으면 token_id 별 최저 호가 감시
+        "12": 250,                //   (maxPriceUsd 대신)
         "87": 300
       }
     }
@@ -67,6 +72,7 @@ TG_CHAT_ID=chat_id
 }
 ```
 
+- **최저가만 사고 싶으면** `maxPriceUsd` 만 넣으면 된다. 특정 번호를 노릴 때만 `tokens` 사용.
 - `slug` 는 element.market 컬렉션 페이지 URL 이나 `GET /openapi/v1/collection` 로 확인한다. 폴링 방식만 쓸 거면 없어도 된다.
 - 목표가는 USD 기준(`priceUSD`). BNB 기준으로 바꾸려면 `watcher.js` 의 비교 로직을 `priceBase` 로 교체한다.
 
