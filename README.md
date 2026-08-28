@@ -15,9 +15,17 @@ Element(BNB Chain) 마켓플레이스에서 관심 있는 NFT의 **최저 호가
 ## 준비물
 
 1. **Element API 키** — <https://forms.gle/78wpggURGADCjshr7> 로 신청 (레이트리밋 120요청/분/키)
-2. **Telegram 봇**
-   - `@BotFather` 에서 `/newbot` → 토큰 발급
-   - 봇에게 아무 메시지 전송 후 `https://api.telegram.org/bot<토큰>/getUpdates` 에서 `chat.id` 확인
+2. **알림 채널 최소 1개** (`.env` 에 설정한 채널로 모두 전송, 없으면 콘솔 출력만)
+
+   | 채널 | 설정 변수 | 발급 방법 |
+   | --- | --- | --- |
+   | Telegram | `TG_TOKEN`, `TG_CHAT_ID` | `@BotFather` `/newbot` → 토큰. 봇에 메시지 후 `https://api.telegram.org/bot<토큰>/getUpdates` 에서 `chat.id` |
+   | Discord | `DISCORD_WEBHOOK_URL` | 채널 설정 > 연동 > 웹후크 > URL 복사 |
+   | Slack | `SLACK_WEBHOOK_URL` | <https://api.slack.com/messaging/webhooks> 에서 Incoming Webhook 생성 |
+   | ntfy | `NTFY_TOPIC` (선택 `NTFY_SERVER`, `NTFY_TOKEN`) | 앱 설치 후 임의 토픽 구독. 계정 불필요, 셀프호스팅 가능 |
+   | Pushover | `PUSHOVER_TOKEN`, `PUSHOVER_USER` | <https://pushover.net> (앱 1회 $5) |
+   | 범용 Webhook | `WEBHOOK_URL` | `{ "text": "..." }` 형태로 POST |
+
 3. **Node.js 20 이상**
 
 ## 설정
@@ -32,8 +40,11 @@ npm install            # stream 방식에 필요한 ws 설치
 
 ```
 ELEMENT_API_KEY=발급받은_키
+# 아래 중 쓰고 싶은 채널만 채우면 된다 (전체 목록은 .env.example 참고)
 TG_TOKEN=봇_토큰
 TG_CHAT_ID=chat_id
+# DISCORD_WEBHOOK_URL=...
+# NTFY_TOPIC=...
 ```
 
 `config.json`
