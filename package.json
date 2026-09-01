@@ -6,6 +6,7 @@
   "description": "Element(BNB Chain) NFT 최저 호가 알림 도구",
   "scripts": {
     "poll": "node --env-file=.env watcher.js",
+    "floors": "node --env-file=.env check-floors.js",
     "stream": "node --env-file=.env stream-watcher.js",
     "test:notify": "node --env-file=.env test-notify.js"
   },

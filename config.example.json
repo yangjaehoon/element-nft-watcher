@@ -1,21 +1,17 @@
 {
-  "intervalMs": 20000,
-  "maxPagesPerContract": 3,
+  "intervalMs": 60000,
   "watchlist": [
     {
       "name": "Collection A",
       "contract": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       "slug": "collection-a-slug",
-      "maxPriceUsd": 300
+      "maxPriceBnb": 0.5
     },
     {
-      "name": "Collection B (특정 번호만 감시하고 싶을 때)",
+      "name": "Collection B (USD 로 목표가 지정)",
       "contract": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
       "slug": "collection-b-slug",
-      "tokens": {
-        "4": 1000,
-        "9": 1200
-      }
+      "maxPriceUsd": 300
     }
   ]
 }
