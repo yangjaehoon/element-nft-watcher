@@ -7,7 +7,7 @@
 import fs from "node:fs";
 import puppeteer from "puppeteer";
 import { notify } from "./notify.js";
-import { fetchCheapestListings } from "./lib/element-scrape.js";
+import { fetchCheapestListings, fetchListingsByTrait } from "./lib/element-scrape.js";
 
 const CONFIG_FILE = "./config.json";
 const STATE_FILE = "./seen.json";
@@ -29,17 +29,29 @@ async function checkCollection(browser, w) {
     return;
   }
 
-  const { listings } = await fetchCheapestListings(browser, w.slug);
+  if (w.maxPriceUsd != null) {
+    const { listings } = await fetchCheapestListings(browser, w.slug);
+    await notifyMatches(w, listings, w.maxPriceUsd, "");
+  }
 
+  for (const rw of w.rarityWatch ?? []) {
+    const { listings } = await fetchListingsByTrait(browser, w.slug, rw.value, {
+      traitName: rw.trait ?? "Rarity",
+    });
+    await notifyMatches(w, listings, rw.maxPriceUsd, ` [${rw.value}]`);
+  }
+}
+
+async function notifyMatches(w, listings, maxPriceUsd, label) {
   for (const l of listings) {
     if (l.expirationTime && l.expirationTime * 1000 < Date.now()) continue;
-    if (l.priceUsd > w.maxPriceUsd) break; // 가격 오름차순이라 이후는 볼 필요 없음
+    if (l.priceUsd > maxPriceUsd) break; // 가격 오름차순이라 이후는 볼 필요 없음
     if (seen.has(l.orderId)) continue;
 
     seen.set(l.orderId, Date.now());
     await notify(
-      `${w.name} #${l.tokenId} 매물\n` +
-        `$${l.priceUsd.toFixed(2)} (${l.priceBase} BNB) · 목표 $${w.maxPriceUsd} 이하\n` +
+      `${w.name}${label} #${l.tokenId} 매물\n` +
+        `$${l.priceUsd.toFixed(2)} (${l.priceBase} BNB) · 목표 $${maxPriceUsd} 이하\n` +
         `https://element.market/assets/bsc/${l.contractAddress}/${l.tokenId}`,
       { discordWebhookUrl: w.discordWebhookUrl },
     );

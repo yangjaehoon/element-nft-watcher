@@ -64,8 +64,11 @@ DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
       "name": "표시용 이름",
       "contract": "0x... NFT 컨트랙트 주소 (BNB Chain, 알림 링크용)",
       "slug": "element.market/collections/<여기> 의 슬러그",
-      "maxPriceUsd": 17,              // 이 값 이하 매물이 뜨면 알림
-      "discordWebhookUrl": ""         // 이 컬렉션 전용 채널. 비워두면 .env 의 DISCORD_WEBHOOK_URL 사용
+      "maxPriceUsd": 17,              // 컬렉션 전체 최저가 감시: 이 값 이하 매물이 뜨면 알림 (생략 가능)
+      "discordWebhookUrl": "",        // 이 컬렉션 전용 채널. 비워두면 .env 의 DISCORD_WEBHOOK_URL 사용
+      "rarityWatch": [                // 특정 등급(특성)이 낮은 가격에 올라오면 별도로 알림 (선택)
+        { "value": "Mythic", "maxPriceUsd": 30 }
+      ]
     }
   ]
 }
@@ -83,7 +86,24 @@ DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
 `npm run test:notify` 를 실행하면 전역 채널 1건 + `discordWebhookUrl` 이 설정된 컬렉션마다
 1건씩, 총 여러 건의 테스트 메시지를 보내 각 채널이 맞게 연결됐는지 확인할 수 있다.
 
-목표가를 못 정했으면 먼저 `npm run floors` 로 현재 최저가를 확인한다.
+### 특정 등급이 낮은 가격에 올라오면 알림 (rarityWatch)
+
+`maxPriceUsd` 는 컬렉션 전체 최저가만 본다. 특정 희귀도(예: Mythic, Legendary)가
+평소 시세보다 훨씬 싸게(예: 바닥가 근처로) 올라오는 걸 잡으려면 `rarityWatch` 를 쓴다.
+
+```jsonc
+"rarityWatch": [
+  { "value": "Mythic", "maxPriceUsd": 30 },     // trait 생략 시 기본값 "Rarity"
+  { "trait": "Background", "value": "Gold", "maxPriceUsd": 50 }
+]
+```
+
+- 컬렉션 페이지 왼쪽 **특성(Traits)** 필터에 있는 항목명/값을 그대로 쓴다 (대소문자·철자 정확히)
+- 동작 방식: 헤드리스 브라우저로 그 필터를 실제로 클릭해서 적용한 뒤, 필터링된 매물 목록을 가져온다.
+  UI를 직접 조작하는 방식이라 사이트 필터 UI가 바뀌면 깨질 수 있다.
+- 등급별 매물이 몇 건 있고 현재 최저가가 얼마인지는 `npm run floors` 로 확인 가능
+
+목표가를 못 정했으면 먼저 `npm run floors` 로 현재 최저가(+ rarityWatch 대상)를 확인한다.
 
 ## 실행
 
