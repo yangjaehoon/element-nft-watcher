@@ -1,8 +1,8 @@
 // 설정된 알림 채널이 실제로 동작하는지 확인하는 테스트.
 // config.json 의 watchlist 에 컬렉션별 discordWebhookUrl 이 있으면 그것도 각각 테스트한다.
 // 실행: npm run test:notify
-import fs from "node:fs";
 import { notify } from "./notify.js";
+import { loadJson } from "./lib/config.js";
 
 await notify(
   "element-nft-watcher 알림 테스트 (전역 채널)\n" +
@@ -10,7 +10,7 @@ await notify(
     `시각: ${new Date().toISOString()}`,
 );
 
-const cfg = tryLoadJson("./config.json");
+const cfg = loadJson("./config.json", null);
 const withOwnWebhook = (cfg?.watchlist ?? []).filter((w) => w.discordWebhookUrl);
 
 for (const w of withOwnWebhook) {
@@ -24,11 +24,3 @@ for (const w of withOwnWebhook) {
 console.log(
   `전송 시도 완료 (전역 1건 + 컬렉션별 ${withOwnWebhook.length}건). 위에 [notify:...] 오류 로그가 없으면 성공.`,
 );
-
-function tryLoadJson(p) {
-  try {
-    return JSON.parse(fs.readFileSync(p, "utf8"));
-  } catch {
-    return null;
-  }
-}

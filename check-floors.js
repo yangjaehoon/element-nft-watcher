@@ -3,11 +3,11 @@
 //
 // 실행: npm run floors
 
-import fs from "node:fs";
 import puppeteer from "puppeteer";
-import { fetchCheapestListings, fetchAssetTrait } from "./lib/element-scrape.js";
+import { loadConfigOrExit } from "./lib/config.js";
+import { fetchCheapestListings, findRarityMatches } from "./lib/element-scrape.js";
 
-const cfg = JSON.parse(fs.readFileSync("./config.json", "utf8"));
+const cfg = loadConfigOrExit();
 const browser = await puppeteer.launch({ headless: true });
 
 for (const w of cfg.watchlist ?? []) {
@@ -34,28 +34,22 @@ for (const w of cfg.watchlist ?? []) {
   }
 
   for (const rw of w.rarityWatch ?? []) {
-    const traitName = rw.trait ?? "Rarity";
-    const candidates = listings.filter((l) => l.priceUsd <= rw.maxPriceUsd);
-    const matches = [];
-
-    for (const l of candidates) {
-      try {
-        const value = await fetchAssetTrait(browser, l.contractAddress, l.tokenId, traitName);
-        if (value === rw.value) matches.push(l);
-      } catch (e) {
-        console.log(`  [${rw.value}] #${l.tokenId} 확인 실패 - ${e.message}`);
+    try {
+      const { matches, checkedCount } = await findRarityMatches(browser, listings, {
+        trait: rw.trait,
+        value: rw.value,
+        maxPriceUsd: rw.maxPriceUsd,
+      });
+      if (matches.length === 0) {
+        console.log(`  [${rw.value}] $${rw.maxPriceUsd} 이하 매물 중 없음 (후보 ${checkedCount}개 확인)`);
+      } else {
+        console.log(
+          `  [${rw.value}] $${rw.maxPriceUsd} 이하에서 발견!\n` +
+            matches.map((l) => `    #${l.tokenId}  $${l.priceUsd.toFixed(2)}  (${l.priceBase} BNB)`).join("\n"),
+        );
       }
-    }
-
-    if (matches.length === 0) {
-      console.log(
-        `  [${rw.value}] $${rw.maxPriceUsd} 이하 매물 중 없음 (후보 ${candidates.length}개 확인)`,
-      );
-    } else {
-      console.log(
-        `  [${rw.value}] $${rw.maxPriceUsd} 이하에서 발견!\n` +
-          matches.map((l) => `    #${l.tokenId}  $${l.priceUsd.toFixed(2)}  (${l.priceBase} BNB)`).join("\n"),
-      );
+    } catch (e) {
+      console.log(`  [${rw.value}] 확인 실패 - ${e.message}`);
     }
   }
 }

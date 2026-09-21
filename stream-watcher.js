@@ -7,15 +7,12 @@
 // 주의: item_listed 이벤트의 정확한 payload 필드명은 공식 문서에 공개돼 있지 않다.
 //       처음 실행 시 DEBUG=1 로 실제 메시지를 찍어보고 아래 매핑을 확정할 것.
 
-import fs from "node:fs";
 import WebSocket from "ws";
 import { notify } from "./notify.js";
+import { loadConfigOrExit } from "./lib/config.js";
+import { assetUrl } from "./lib/element-scrape.js";
 
-const cfg = loadJson("./config.json", null);
-if (!cfg) {
-  console.error("config.json 이 없습니다. config.example.json 을 복사해서 작성하세요.");
-  process.exit(1);
-}
+const cfg = loadConfigOrExit();
 if (!process.env.ELEMENT_API_KEY) {
   console.error("ELEMENT_API_KEY 가 없습니다. .env 를 확인하세요.");
   process.exit(1);
@@ -83,7 +80,7 @@ function connect() {
     await notify(
       `${w.name} #${tokenId} 신규 매물\n` +
         `$${priceUsd} · 목표 $${maxUsd} 이하\n` +
-        `https://element.market/assets/bsc/${w.contract}/${tokenId}`,
+        `${assetUrl(w.contract, tokenId)}`,
     );
   });
 
@@ -97,14 +94,6 @@ function connect() {
     console.error("stream error", e.message);
     ws.close();
   });
-}
-
-function loadJson(p, def) {
-  try {
-    return JSON.parse(fs.readFileSync(p, "utf8"));
-  } catch {
-    return def;
-  }
 }
 
 connect();
