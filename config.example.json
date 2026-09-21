@@ -1,17 +1,11 @@
 {
-  "intervalMs": 60000,
+  "intervalMs": 90000,
   "watchlist": [
     {
       "name": "Collection A",
       "contract": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       "slug": "collection-a-slug",
-      "maxPriceBnb": 0.5
-    },
-    {
-      "name": "Collection B (USD 로 목표가 지정)",
-      "contract": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-      "slug": "collection-b-slug",
-      "maxPriceUsd": 300
+      "maxPriceUsd": 50
     }
   ]
 }
