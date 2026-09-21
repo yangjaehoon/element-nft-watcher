@@ -3,7 +3,7 @@
 //
 // 지원 채널 (환경변수):
 //   Telegram : TG_TOKEN, TG_CHAT_ID
-//   Discord  : DISCORD_WEBHOOK_URL
+//   Discord  : DISCORD_WEBHOOK_URL (기본값. notify(text, { discordWebhookUrl }) 로 컬렉션별 override 가능)
 //   Slack    : SLACK_WEBHOOK_URL
 //   ntfy     : NTFY_TOPIC, (선택) NTFY_SERVER=https://ntfy.sh, (선택) NTFY_TOKEN
 //   Pushover : PUSHOVER_TOKEN, PUSHOVER_USER
@@ -11,7 +11,7 @@
 
 const channels = [
   { name: "telegram", enabled: () => process.env.TG_TOKEN && process.env.TG_CHAT_ID, send: sendTelegram },
-  { name: "discord", enabled: () => process.env.DISCORD_WEBHOOK_URL, send: sendDiscord },
+  { name: "discord", enabled: (o) => o.discordWebhookUrl || process.env.DISCORD_WEBHOOK_URL, send: sendDiscord },
   { name: "slack", enabled: () => process.env.SLACK_WEBHOOK_URL, send: sendSlack },
   { name: "ntfy", enabled: () => process.env.NTFY_TOPIC, send: sendNtfy },
   { name: "pushover", enabled: () => process.env.PUSHOVER_TOKEN && process.env.PUSHOVER_USER, send: sendPushover },
@@ -19,15 +19,17 @@ const channels = [
 ];
 
 // text 는 여러 줄 문자열. 첫 줄을 제목으로 쓰는 채널(ntfy, pushover)이 있다.
-export async function notify(text) {
-  const active = channels.filter((c) => c.enabled());
+// opts.discordWebhookUrl 을 주면 그 컬렉션의 알림만 해당 디스코드 채널로 보낸다
+// (안 주면 .env 의 DISCORD_WEBHOOK_URL 사용). 다른 채널(Telegram 등)은 항상 전역 설정을 쓴다.
+export async function notify(text, opts = {}) {
+  const active = channels.filter((c) => c.enabled(opts));
 
   if (active.length === 0) {
     console.log("[notify]", text);
     return;
   }
 
-  const results = await Promise.allSettled(active.map((c) => c.send(text)));
+  const results = await Promise.allSettled(active.map((c) => c.send(text, opts)));
   results.forEach((r, i) => {
     if (r.status === "rejected") {
       console.error(`[notify:${active[i].name}] 전송 실패`, r.reason?.message ?? r.reason);
@@ -57,8 +59,9 @@ function sendTelegram(text) {
   });
 }
 
-function sendDiscord(text) {
-  return post(process.env.DISCORD_WEBHOOK_URL, {
+function sendDiscord(text, opts) {
+  const url = opts?.discordWebhookUrl || process.env.DISCORD_WEBHOOK_URL;
+  return post(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ content: text }),

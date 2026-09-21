@@ -41,6 +41,7 @@ async function checkCollection(browser, w) {
       `${w.name} #${l.tokenId} 매물\n` +
         `$${l.priceUsd.toFixed(2)} (${l.priceBase} BNB) · 목표 $${w.maxPriceUsd} 이하\n` +
         `https://element.market/assets/bsc/${l.contractAddress}/${l.tokenId}`,
+      { discordWebhookUrl: w.discordWebhookUrl },
     );
   }
 }

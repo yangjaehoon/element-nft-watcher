@@ -64,11 +64,24 @@ DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
       "name": "표시용 이름",
       "contract": "0x... NFT 컨트랙트 주소 (BNB Chain, 알림 링크용)",
       "slug": "element.market/collections/<여기> 의 슬러그",
-      "maxPriceUsd": 17               // 이 값 이하 매물이 뜨면 알림
+      "maxPriceUsd": 17,              // 이 값 이하 매물이 뜨면 알림
+      "discordWebhookUrl": ""         // 이 컬렉션 전용 채널. 비워두면 .env 의 DISCORD_WEBHOOK_URL 사용
     }
   ]
 }
 ```
+
+### 컬렉션마다 다른 디스코드 채널로 알림 받기
+
+컬렉션별로 `discordWebhookUrl` 을 채우면 그 컬렉션의 알림만 지정한 채널로 간다.
+비워두면(`""`) `.env` 의 공통 `DISCORD_WEBHOOK_URL` 로 간다. 즉:
+
+- 3개 컬렉션에 서로 다른 채널 웹훅을 넣으면 → 각자 다른 채널로 알림
+- 일부만 채우면 → 채운 것만 전용 채널, 나머지는 공통 채널
+- Telegram/Slack/ntfy 등 다른 채널은 컬렉션별 분기 없이 항상 `.env` 의 전역 설정을 쓴다
+
+`npm run test:notify` 를 실행하면 전역 채널 1건 + `discordWebhookUrl` 이 설정된 컬렉션마다
+1건씩, 총 여러 건의 테스트 메시지를 보내 각 채널이 맞게 연결됐는지 확인할 수 있다.
 
 목표가를 못 정했으면 먼저 `npm run floors` 로 현재 최저가를 확인한다.
 

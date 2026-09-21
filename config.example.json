@@ -5,7 +5,8 @@
       "name": "Collection A",
       "contract": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       "slug": "collection-a-slug",
-      "maxPriceUsd": 50
+      "maxPriceUsd": 50,
+      "discordWebhookUrl": "https://discord.com/api/webhooks/... (이 컬렉션 전용 채널. 비워두면 .env 의 DISCORD_WEBHOOK_URL 사용)"
     }
   ]
 }
