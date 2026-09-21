@@ -5,7 +5,7 @@
 
 import fs from "node:fs";
 import puppeteer from "puppeteer";
-import { fetchCheapestListings, fetchListingsByTrait } from "./lib/element-scrape.js";
+import { fetchCheapestListings, fetchAssetTrait } from "./lib/element-scrape.js";
 
 const cfg = JSON.parse(fs.readFileSync("./config.json", "utf8"));
 const browser = await puppeteer.launch({ headless: true });
@@ -16,14 +16,16 @@ for (const w of cfg.watchlist ?? []) {
     continue;
   }
 
+  let listings = [];
   try {
-    const { listings, totalCount } = await fetchCheapestListings(browser, w.slug);
+    const r = await fetchCheapestListings(browser, w.slug);
+    listings = r.listings;
     if (listings.length === 0) {
       console.log(`${w.name}: 활성 매물 없음`);
     } else {
       const top = listings.slice(0, 3);
       console.log(
-        `${w.name} (활성 매물 ${totalCount}건, 최저 3개)\n` +
+        `${w.name} (활성 매물 ${r.totalCount}건, 최저 3개)\n` +
           top.map((l) => `  #${l.tokenId}  $${l.priceUsd.toFixed(2)}  (${l.priceBase} BNB)`).join("\n"),
       );
     }
@@ -32,21 +34,28 @@ for (const w of cfg.watchlist ?? []) {
   }
 
   for (const rw of w.rarityWatch ?? []) {
-    try {
-      const { listings, totalCount } = await fetchListingsByTrait(browser, w.slug, rw.value, {
-        traitName: rw.trait ?? "Rarity",
-      });
-      if (listings.length === 0) {
-        console.log(`  [${rw.value}] 활성 매물 없음`);
-      } else {
-        const top = listings.slice(0, 3);
-        console.log(
-          `  [${rw.value}] (${totalCount}건, 최저 3개)\n` +
-            top.map((l) => `    #${l.tokenId}  $${l.priceUsd.toFixed(2)}  (${l.priceBase} BNB)`).join("\n"),
-        );
+    const traitName = rw.trait ?? "Rarity";
+    const candidates = listings.filter((l) => l.priceUsd <= rw.maxPriceUsd);
+    const matches = [];
+
+    for (const l of candidates) {
+      try {
+        const value = await fetchAssetTrait(browser, l.contractAddress, l.tokenId, traitName);
+        if (value === rw.value) matches.push(l);
+      } catch (e) {
+        console.log(`  [${rw.value}] #${l.tokenId} 확인 실패 - ${e.message}`);
       }
-    } catch (e) {
-      console.log(`  [${rw.value}] 오류 - ${e.message}`);
+    }
+
+    if (matches.length === 0) {
+      console.log(
+        `  [${rw.value}] $${rw.maxPriceUsd} 이하 매물 중 없음 (후보 ${candidates.length}개 확인)`,
+      );
+    } else {
+      console.log(
+        `  [${rw.value}] $${rw.maxPriceUsd} 이하에서 발견!\n` +
+          matches.map((l) => `    #${l.tokenId}  $${l.priceUsd.toFixed(2)}  (${l.priceBase} BNB)`).join("\n"),
+      );
     }
   }
 }

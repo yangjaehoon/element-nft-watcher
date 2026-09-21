@@ -2,5 +2,6 @@ node_modules/
 .env
 config.json
 seen.json
+trait-cache.json
 *.log
 .DS_Store
