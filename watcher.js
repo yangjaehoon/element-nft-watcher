@@ -106,13 +106,16 @@ async function main() {
   });
 
   async function tick() {
-    const watchlist = cfg.watchlist ?? [];
-    const results = await Promise.allSettled(watchlist.map((w) => checkCollection(browser, w)));
-    results.forEach((r, i) => {
-      if (r.status === "rejected") {
-        console.error(`[${watchlist[i].name}]`, r.reason?.message ?? r.reason);
+    // 컬렉션을 동시에(Promise.allSettled) 확인해봤는데, 헤드리스 페이지가
+    // 한꺼번에 여러 개 뜨면서(특히 등급 후보가 많을 때) 서로 리소스를 다 먹어
+    // "Navigation timeout" 이 나는 걸 실제로 겪었다. 순서대로 하나씩 확인한다.
+    for (const w of cfg.watchlist ?? []) {
+      try {
+        await checkCollection(browser, w);
+      } catch (e) {
+        console.error(`[${w.name}]`, e.message);
       }
-    });
+    }
     persist();
   }
 
